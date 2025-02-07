@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор с карточками</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2c2c2c;
+            margin: 0;
+            color: #f4f4f4;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            width: 100%;
+            flex-direction: row;
+        }
+
+        .calculator {
+            background-color: #3a3a3a;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+            width: 600px;
+            max-width: 100%;
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .display {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .row {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background-color: #4a4a4a;
+            border-radius: 10px;
+            padding: 8px;
+            font-size: 16px;
+            text-align: center;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            color: #f4f4f4;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+        }
+
+        .card:hover {
+            background-color: #5a5a5a;
+        }
+
+        .card.number {
+            width: auto;
+        }
+
+        .card.operator {
+            width: 30px;
+            background-color: transparent;
+            color: #f4f4f4;
+            padding: 8px;
+            box-shadow: none;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .buttons button {
+            padding: 16px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            background-color: #5a5a5a;
+            color: #f4f4f4;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            flex: 1;
+        }
+
+        .buttons button:hover {
+            background-color: #6a6a6a;
+        }
+
+        .buttons button.operator {
+            background-color: #ff9500;
+            color: white;
+        }
+
+        .buttons button.operator:hover {
+            background-color: #e08900;
+        }
+
+        .buttons button.equal {
+            background-color: #34c759;
+            color: white;
+            width: 100%;
+        }
+
+        .buttons button.equal:hover {
+            background-color: #2da94f;
+        }
+
+        .drop-container {
+            background-color: #3a3a3a;
+            border-radius: 15px;
+            padding: 16px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+            width: 200px;
+            height: auto;
+            max-height: 24vh;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            overflow-y: auto;
+            max-width: 100%;
+        }
+
+        .drop-container .card {
+            cursor: grab;
+            padding-right: 0;
+            width: 80%;
+            display: inline-block;
+            position: relative;
+            text-align: center;
+        }
+
+        /* Style the delete button */
+        .delete-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .drop-container .card:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .comment-input {
+            width: 80%;
+            padding: 4px;
+            margin-top: 4px;
+            border-radius: 5px;
+            border: 1px solid #5a5a5a;
+            background-color: #4a4a4a;
+            color: #f4f4f4;
+        }
+
+        .vat-input-container {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .vat-input-container label {
+            font-size: 16px;
+        }
+
+        .vat-input {
+            width: 60px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #5a5a5a;
+            background-color: #4a4a4a;
+            color: #f4f4f4;
+            text-align: center;
+        }
+
+        /* Для body с высотой 80% */
+        @media (min-width: 769px) {
+            body {
+                align-items: center;
+                /* для выравнивания по вертикали */
+            }
+        }
+
+        /* Медиа-запрос для мобильных устройств */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+                /* Увеличиваем отступ для body */
+                box-sizing: border-box;
+            }
+
+            .container {
+                flex-direction: column;
+                align-items: center;
+                padding: 0;
+                /* Убираем отступ у container */
+                box-sizing: border-box;
+                 width: 100%;
+            }
+
+            .calculator {
+                width: 100%;
+                padding: 16px;
+                /* Уменьшен padding */
+                box-sizing: border-box;
+                height: auto;
+                /* Убираем ограничение высоты для mobile*/
+            }
+
+            /*Применяем уменьшение контента и высоты на mobile dropContainer*/
+            .drop-container {
+                position: static;
+                /* Убираем фиксированное позиционирование */
+                width: 100%;
+                max-height: 24vh;
+                padding: 16px;
+                /* Уменьшен padding */
+                box-sizing: border-box;
+            }
+
+            .card.number {
+                cursor: pointer;
+            }
+
+            .card {
+                padding: 8px;
+                /* Уменьшен padding */
+                font-size: 16px;
+                /* Уменьшен шрифт */
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Калькулятор -->
+        <div class="calculator">
+            <!-- Дисплей для истории и текущего выражения -->
+            <div class="display" id="display">
+                <!-- Здесь будут появляться ряды с карточками -->
+            </div>
+
+            <!-- VAT Input -->
+            <div class="vat-input-container">
+                <label for="vatRate">Ставка НДС (%):</label>
+                <input type="number" id="vatRate" class="vat-input" value="20" min="0" max="100">
+            </div>
+
+            <!-- Кнопки калькулятора -->
+            <div class="buttons">
+                <!-- Ряд с цифрами от 0 до 9 -->
+                <div class="row">
+                    <button onclick="appendNumber(0)">0</button>
+                    <button onclick="appendNumber(1)">1</button>
+                    <button onclick="appendNumber(2)">2</button>
+                    <button onclick="appendNumber(3)">3</button>
+                    <button onclick="appendNumber(4)">4</button>
+                    <button onclick="appendNumber(5)">5</button>
+                    <button onclick="appendNumber(6)">6</button>
+                    <button onclick="appendNumber(7)">7</button>
+                    <button onclick="appendNumber(8)">8</button>
+                    <button onclick="appendNumber(9)">9</button>
+                    <!-- Кнопка "=" на всю ширину -->
+                    <button class="equal" onclick="calculate()">=</button>
+                </div>
+
+                <!-- Ряд с операторами и специальными кнопками -->
+                <div class="row">
+                    <button onclick="clearDisplay()">C</button>
+                    <button onclick="deleteLast()">←</button>
+                    <button class="operator" onclick="appendOperator('+')">+</button>
+                    <button class="operator" onclick="appendOperator('-')">-</button>
+                    <button class="operator" onclick="appendOperator('*')">*</button>
+                    <button onclick="appendOperator('/')">/</button>
+                    <button onclick="appendOperator('%')">%</button>
+                    <button onclick="appendOperator('()')">()</button>
+                    <button onclick="appendNumber('.')">.</button>
+                    <!-- Меняем местами кнопки -->
+                    <button onclick="appendOperator('|')">|</button>
+                    <button onclick="addVAT()">Начислить НДС</button>
+                    <!--Конец перестановки-->
+                    <button onclick="extractVAT()">Выделить НДС</button>
+                    <button onclick="calculateBaseByVAT()">Расчет базы по НДС</button>
+                    <button onclick="calculateAverage()">Среднее</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Контейнер для перетаскивания карточек -->
+        <div class="drop-container" id="dropContainer">
+            <!-- Сюда будут перетаскиваться карточки -->
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let dropContainer = document.getElementById('dropContainer');
+        let currentExpression = localStorage.getItem('currentExpression') || '';
+        let isNewExpression = localStorage.getItem('isNewExpression') === 'true' || false;
+        let lastBracket = localStorage.getItem('lastBracket') || '('; // Для отслеживания типа скобки
+        let vatRate = localStorage.getItem('vatRate') || '20';
+        let touchstartX = 0;
+        let touchendX = 0;
+        let touchstartY = 0;
+        let touchendY = 0;
+
+        document.getElementById('vatRate').value = vatRate;
+
+        // Восстанавливаем историю из localStorage
+        let history = JSON.parse(localStorage.getItem('history') || '[]');
+        history.forEach(content => addToHistory(content, false));
+
+        function loadDropContainerContent() {
+            const savedCards = localStorage.getItem('dropContainerCards');
+            if (savedCards) {
+                const cards = JSON.parse(savedCards);
+                cards.forEach(cardData => {
+                    createCardInDropContainer(cardData.value, cardData.comment);
+                });
+            }
+        }
+        loadDropContainerContent();
+
+        function saveDropContainerContent() {
+            const cardContainers = Array.from(dropContainer.children);
+            const cardData = cardContainers.map(container => {
+                const card = container.querySelector('.card');
+                const comment = container.querySelector('.comment-input').value;
+                return {
+                    value: card.textContent,
+                    comment: comment
+                };
+            });
+            localStorage.setItem('dropContainerCards', JSON.stringify(cardData));
+        }
+
+        // Сохраняем состояние перед закрытием страницы
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem('currentExpression', currentExpression);
+            localStorage.setItem('isNewExpression', isNewExpression);
+            localStorage.setItem('lastBracket', lastBracket);
+            localStorage.setItem('vatRate', document.getElementById('vatRate').value);
+            localStorage.setItem('history', JSON.stringify(history));
+            saveDropContainerContent();
+        });
+
+        // Обработчик ввода с клавиатуры
+        document.addEventListener('keydown', (e) => {
+            const key = e.key;
+
+            // Цифры
+            if (/[0-9]/.test(key)) {
+                appendNumber(key);
+            }
+            // Операторы
+            else if (['+', '-', '*', '/', '%', '|'].includes(key)) {
+                appendOperator(key);
+            }
+            // Скобки
+            else if (key === '(' || key === ')') {
+                appendOperator(key);
+            }
+            // Точка
+            else if (key === '.') {
+                appendNumber('.');
+            }
+            // Enter (вычисление)
+            else if (key === 'Enter') {
+                e.preventDefault(); // Предотвращаем действие по умолчанию
+                calculate();
+            }
+            // Backspace (удаление последнего символа)
+            else if (key === 'Backspace') {
+                deleteLast();
+            }
+            // Escape (очистка)
+            else if (key === 'Escape') {
+                clearDisplay();
+            }
+        });
+
+        // Обработчик вставки из буфера обмена
+        document.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            if (/^[0-9.]+$/.test(pastedText)) {
+                appendNumber(pastedText);
+            }
+        });
+
+        function appendNumber(number) {
+            if (isNewExpression) {
+                moveCurrentToHistory();
+                isNewExpression = false;
+            }
+            currentExpression += number;
+            updateCurrentDisplay();
+        }
+
+        function appendOperator(operator) {
+            if (isNewExpression) {
+                moveCurrentToHistory();
+                isNewExpression = false;
+            }
+            if (operator === '()') {
+                // Автоматически выбираем тип скобки
+                currentExpression += lastBracket;
+                lastBracket = lastBracket === '(' ? ')' : '(';
+            } else {
+                currentExpression += operator;
+            }
+            updateCurrentDisplay();
+        }
+
+        function clearDisplay() {
+            currentExpression = '';
+            display.innerHTML = '';
+            history = []; // Очищаем историю
+            localStorage.removeItem('history'); // Очищаем историю в localStorage
+            isNewExpression = false;
+            localStorage.setItem('isNewExpression', isNewExpression); // Сохраняем в localStorage
+        }
+
+        function deleteLast() {
+            currentExpression = currentExpression.slice(0, -1);
+            updateCurrentDisplay();
+        }
+
+        function calculate() {
+            try {
+                const regex = /(\d+)\s*([+\-])\s*(\d+)%/;
+                const match = currentExpression.match(regex);
+
+                if (match) {
+                    // Получаем значения из выражения
+                    const number = parseFloat(match[1]);
+                    const operator = match[2];
+                    const percentage = parseFloat(match[3]);
+
+                    // Вычисляем процент от числа
+                    let percentageValue = number * (percentage / 100);
+
+                    let result;
+                    if (operator === '+') {
+                        result = number + percentageValue;
+                    } else if (operator === '-') {
+                        result = number - percentageValue;
+                    }
+
+                    // Если результат успешно вычислен, добавляем в историю и очищаем
+                    addToHistory(currentExpression + '=' + result);
+                    currentExpression = '';
+                    updateCurrentDisplay();
+                    isNewExpression = true;
+                } else {
+                    let result = eval(currentExpression.replace(/%/g, '/100*'));
+                    addToHistory(currentExpression + '=' + result);
+                    currentExpression = '';
+                    updateCurrentDisplay();
+                    isNewExpression = true;
+                }
+            } catch (e) {
+                // Обработка ошибок при вычислении
+                addToHistory("Error in Expression");
+                currentExpression = '';
+                updateCurrentDisplay();
+                isNewExpression = true;
+            }
+        }
+
+        function updateCurrentDisplay() {
+            let currentRow = display.lastElementChild;
+            if (!currentRow || isNewExpression) {
+                currentRow = document.createElement('div');
+                currentRow.className = 'row';
+                display.appendChild(currentRow);
+            }
+            currentRow.innerHTML = '';
+            let tokens = tokenizeExpression(currentExpression);
+            for (let token of tokens) {
+                addCard(currentRow, token);
+            }
+            // Автоматическая прокрутка вниз
+            display.scrollTop = display.scrollHeight;
+        }
+
+        function moveCurrentToHistory() {
+            if (currentExpression !== '') {
+                addToHistory(currentExpression);
+                currentExpression = '';
+                updateCurrentDisplay();
+            }
+        }
+
+        function addToHistory(content, save = true) {
+            let historyRow = document.createElement('div');
+            historyRow.className = 'row';
+            let tokens = tokenizeExpression(content);
+            for (let token of tokens) {
+                addCard(historyRow, token);
+            }
+            display.insertBefore(historyRow, display.lastElementChild);
+            display.scrollTop = display.scrollHeight;
+
+            if (save) {
+                history.push(content); // Добавляем в массив истории
+                localStorage.setItem('history', JSON.stringify(history)); // Сохраняем в localStorage
+            }
+        }
+
+        function addCard(container, content) {
+            let card = document.createElement('div');
+            card.className = 'card';
+            if (!isNaN(content) || content === '.' || content === '%') {
+                card.classList.add('number');
+            } else {
+                card.classList.add('operator');
+            }
+            card.textContent = content;
+
+            card.addEventListener('click', () => {
+                appendNumber(content);
+            });
+
+            card.addEventListener('touchstart', (e) => {
+                touchstartX = e.changedTouches[0].screenX;
+                touchstartY = e.changedTouches[0].screenY;
+            });
+
+            card.addEventListener('touchend', (e) => {
+                touchendX = e.changedTouches[0].screenX;
+                touchendY = e.changedTouches[0].screenY;
+                handleSwipe(card);
+            });
+
+            container.appendChild(card);
+        }
+
+        function tokenizeExpression(expression) {
+            let tokens = [];
+            let currentNumber = '';
+            for (let char of expression) {
+                if (!isNaN(char) || char === '.' || char === '%') {
+                    currentNumber += char;
+                } else {
+                    if (currentNumber !== '') {
+                        tokens.push(currentNumber);
+                        currentNumber = '';
+                    }
+                    tokens.push(char);
+                }
+            }
+            if (currentNumber !== '') {
+                tokens.push(currentNumber);
+            }
+            return tokens;
+        }
+
+        function areParenthesesBalanced(expression) {
+            let stack = [];
+            for (let char of expression) {
+                if (char === '(') {
+                    stack.push(char);
+                } else if (char === ')') {
+                    if (stack.length === 0) {
+                        return false; // Закрывающая скобка без открывающей
+                    }
+                    stack.pop();
+                }
+            }
+            return stack.length === 0; // Все скобки должны быть сбалансированы
+        }
+
+        function createCardInDropContainer(value, comment = '') {
+            if (!isNaN(value) || value === '.' || value === '%') {
+                const cardContainer = document.createElement('div');
+                cardContainer.className = 'card-container';
+
+                const card = document.createElement('div');
+                card.className = 'card number';
+                card.textContent = value;
+                card.addEventListener('click', () => {
+                    appendNumber(value);
+                });
+
+                // Создаем крестик для удаления
+
+                const commentInput = document.createElement('input');
+                commentInput.className = 'comment-input';
+                commentInput.placeholder = 'Комментарий';
+                commentInput.value = comment;
+                commentInput.addEventListener('input', saveDropContainerContent);
+
+                cardContainer.appendChild(card);
+                cardContainer.appendChild(commentInput);
+                dropContainer.appendChild(cardContainer);
+                saveDropContainerContent();
+                  cardContainer.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+
+                // Create a custom context menu
+                const menu = document.createElement('div');
+                menu.style.position = 'absolute';
+                menu.style.left = e.clientX + 'px';
+                menu.style.top = e.clientY + 'px';
+                menu.style.backgroundColor = '#5a5a5a';
+                menu.style.color = '#f4f4f4';
+                menu.style.padding = '5px';
+                menu.style.border = '1px solid #2c2c2c';
+                menu.style.borderRadius = '5px';
+                menu.style.zIndex = '1000'; // Ensure it's on top
+
+                const deleteOption = document.createElement('div');
+                deleteOption.textContent = 'Удалить';
+                deleteOption.style.cursor = 'pointer';
+                deleteOption.addEventListener('click', function() {
+                    cardContainer.remove();
+                    saveDropContainerContent();
+                    menu.remove(); // Remove the custom menu
+
+                });
+
+                menu.appendChild(deleteOption);
+
+                document.body.appendChild(menu);
+
+                // Remove the menu when clicking outside
+                document.addEventListener('click', function removeMenu(event) {
+                    if (!menu.contains(event.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', removeMenu);
+                    }
+                });
+            });
+            }
+        }
+
+        function calculateAverage() {
+            if (currentExpression.includes('|')) {
+                let numbers = currentExpression.split('|').map(Number);
+                if (numbers.every(Number.isFinite)) {
+                    let sum = numbers.reduce((acc, val) => acc + val, 0);
+                    let average = sum / numbers.length;
+                    addToHistory(`${currentExpression} = ${average.toFixed(2)}`);
+                } else {
+                    alert("Некорректный ввод. Введите числа, разделенные '|'.");
+                }
+            } else {
+                alert("Используйте '|' для разделения чисел.");
+            }
+            currentExpression = '';
+            updateCurrentDisplay();
+            isNewExpression = true;
+        }
+
+        function handleSwipe(card) {
+            const swipeThreshold = 50;
+            let xDiff = touchendX - touchstartX;
+            let yDiff = touchendY - touchstartY;
+            if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > swipeThreshold) { // Horizontal Swipe
+                if (xDiff > 0) { // Swipe Right
+                    createCardInDropContainer(card.textContent);
+                  saveDropContainerContent();
+                } else { // Swipe Left
+                    createCardInDropContainer(card.textContent);
+                   saveDropContainerContent();
+                }
+            } else if (Math.abs(yDiff) > swipeThreshold) { //Vertical Swipe
+                if (yDiff < 0) { // Swipe Up
+                    createCardInDropContainer(card.textContent);
+                  saveDropContainerContent();
+                }
+            }
+        }
+
+        function attachDeleteListeners() {
+            const cardContainers = document.querySelectorAll('.drop-container .card-container');
+            cardContainers.forEach(cardContainer => {
+                   cardContainer.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+
+                // Create a custom context menu
+                const menu = document.createElement('div');
+                menu.style.position = 'absolute';
+                menu.style.left = e.clientX + 'px';
+                menu.style.top = e.clientY + 'px';
+                menu.style.backgroundColor = '#5a5a5a';
+                menu.style.color = '#f4f4f4';
+                menu.style.padding = '5px';
+                menu.style.border = '1px solid #2c2c2c';
+                menu.style.borderRadius = '5px';
+                menu.style.zIndex = '1000'; // Ensure it's on top
+
+                const deleteOption = document.createElement('div');
+                deleteOption.textContent = 'Удалить';
+                deleteOption.style.cursor = 'pointer';
+                deleteOption.addEventListener('click', function() {
+                    cardContainer.remove();
+                    saveDropContainerContent();
+                    menu.remove(); // Remove the custom menu
+
+                });
+
+                menu.appendChild(deleteOption);
+
+                document.body.appendChild(menu);
+
+                // Remove the menu when clicking outside
+                document.addEventListener('click', function removeMenu(event) {
+                    if (!menu.contains(event.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', removeMenu);
+                    }
+                });
+            });
+            });
+
+        }
+        attachDeleteListeners();
+    </script>
+
+</body>
+
+</html>
